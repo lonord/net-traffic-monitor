@@ -17,7 +17,7 @@ export async function getCurrentTrafficSpeed(ifName: string, interval?: number):
 	return calculateTrafficSpeed(firstTraffic, secondTraffic)
 }
 
-export async function watchTrafficSpeed(ifName: string, interval: number,
+export function watchTrafficSpeed(ifName: string, interval: number,
 	speedReport: (speed: TrafficSpeed) => void, onError?: (err: any) => void) {
 	interval = interval || 3000
 	let timer: any = null
