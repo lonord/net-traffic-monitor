@@ -20,22 +20,28 @@ export async function getCurrentTrafficSpeed(ifName: string, interval?: number):
 export async function watchTrafficSpeed(ifName: string, interval: number,
 	speedReport: (speed: TrafficSpeed) => void, onError?: (err: any) => void) {
 	interval = interval || 3000
-	let lastTraffic = await getTraffic(ifName)
-	let timer: any = setInterval(() => {
-		getTraffic(ifName).then((t) => {
-			speedReport(calculateTrafficSpeed(lastTraffic, t))
-			lastTraffic = t
-		}).catch((err) => {
-			onError && onError(err)
-			clearInterval(timer)
-			timer = undefined
-		})
-	}, interval)
+	let timer: any = null
+	getTraffic(ifName).then((lt) => {
+		let lastTraffic = lt
+		timer = setInterval(() => {
+			getTraffic(ifName).then((t) => {
+				speedReport(calculateTrafficSpeed(lastTraffic, t))
+				lastTraffic = t
+			}).catch((err) => {
+				stop()
+				onError && onError(err)
+			})
+		}, interval)
+	}).catch((err) => {
+		stop()
+		onError && onError(err)
+	})
+	const stop = () => {
+		timer && clearInterval(timer)
+		timer = undefined
+	}
 	return {
-		stop: () => {
-			timer && clearInterval(timer)
-			timer = undefined
-		}
+		stop
 	}
 }
 
